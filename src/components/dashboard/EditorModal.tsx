@@ -16,6 +16,7 @@ export function EditorModal({ isOpen, onClose, initialData, onSave, onDelete }: 
     const [formData, setFormData] = useState<Partial<Manhwa>>({});
     const [activeTab, setActiveTab] = useState<'details' | 'chapters'>('details');
     const [newChapterFile, setNewChapterFile] = useState<File | null>(null);
+    const [manualChapterUrl, setManualChapterUrl] = useState('');
     const [isScraping, setIsScraping] = useState(false);
 
     useEffect(() => {
@@ -297,25 +298,91 @@ export function EditorModal({ isOpen, onClose, initialData, onSave, onDelete }: 
 
                             <div className="p-4 bg-white/5 rounded-xl border border-white/10 space-y-4">
                                 <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Add New Chapter</h4>
-                                <div className="flex items-end gap-3">
-                                    <div className="flex-1 space-y-2">
-                                        <label className="text-xs text-gray-500">Chapter File (PDF/Images)</label>
-                                        <input
-                                            id="chapter-upload"
-                                            type="file"
-                                            onChange={handleFileChange}
-                                            className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
-                                            accept="image/*,application/pdf"
-                                        />
+
+                                <div className="space-y-4">
+                                    {/* Option 1: File Upload */}
+                                    <div className="flex items-end gap-3">
+                                        <div className="flex-1 space-y-2">
+                                            <label className="text-xs text-gray-500">Option 1: Upload File (PDF/Images)</label>
+                                            <input
+                                                id="chapter-upload"
+                                                type="file"
+                                                onChange={handleFileChange}
+                                                className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                                                accept="image/*,application/pdf"
+                                            />
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={handleAddChapter}
+                                            disabled={!newChapterFile}
+                                            className="px-4 py-2 bg-primary text-black font-bold rounded-lg hover:bg-emerald-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap h-10"
+                                        >
+                                            + Upload
+                                        </button>
                                     </div>
-                                    <button
-                                        onClick={handleAddChapter}
-                                        disabled={!newChapterFile}
-                                        className="px-4 py-2 bg-primary text-black font-bold rounded-lg hover:bg-emerald-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-                                    >
-                                        + Upload & Add
-                                    </button>
+
+                                    <div className="flex items-center gap-4 py-2">
+                                        <div className="flex-1 h-px bg-white/5"></div>
+                                        <span className="text-[10px] font-bold text-gray-600 uppercase">OR</span>
+                                        <div className="flex-1 h-px bg-white/5"></div>
+                                    </div>
+
+                                    {/* Option 2: URL Link */}
+                                    <div className="flex items-end gap-3">
+                                        <div className="flex-1 space-y-2">
+                                            <label className="text-xs text-gray-500">Option 2: Add via Link (URL)</label>
+                                            <input
+                                                type="url"
+                                                value={manualChapterUrl}
+                                                onChange={(e) => setManualChapterUrl(e.target.value)}
+                                                className="w-full px-3 py-2 bg-black/40 border border-white/10 rounded-lg text-sm focus:border-primary/50 outline-none"
+                                                placeholder="https://..."
+                                            />
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                if (!manualChapterUrl) return;
+                                                const nextNum = (formData.chapters?.length || 0) + 1;
+                                                const newChapter = {
+                                                    id: `manual-${Date.now()}`,
+                                                    number: nextNum,
+                                                    title: `Chapter ${nextNum}`,
+                                                    releasedAt: new Date().toISOString(),
+                                                    contentUrl: manualChapterUrl,
+                                                    fileName: 'Manual Link'
+                                                };
+                                                setFormData({
+                                                    ...formData,
+                                                    chapters: [newChapter, ...(formData.chapters || [])],
+                                                    last_chapter: nextNum
+                                                });
+                                                setManualChapterUrl('');
+                                            }}
+                                            className="px-4 py-2 bg-white/10 text-white font-bold rounded-lg hover:bg-white/20 transition-all h-10"
+                                        >
+                                            + Add URL
+                                        </button>
+                                    </div>
                                 </div>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Chapter List</h4>
+                                {formData.chapters && formData.chapters.length > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            if (confirm('Hapus semua chapter?')) {
+                                                setFormData({ ...formData, chapters: [] });
+                                            }
+                                        }}
+                                        className="text-[10px] text-red-400 hover:text-red-300 transition-colors uppercase font-bold"
+                                    >
+                                        Clear All
+                                    </button>
+                                )}
                             </div>
 
                             <div className="space-y-2">
