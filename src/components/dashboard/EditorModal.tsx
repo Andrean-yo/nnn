@@ -190,9 +190,11 @@ export function EditorModal({ isOpen, onClose, initialData, onSave, onDelete }: 
                                                     ...formData,
                                                     title: data.title || formData.title,
                                                     description: data.description || formData.description,
-                                                    thumbnail: data.thumbnail || formData.thumbnail
+                                                    thumbnail: data.thumbnail || formData.thumbnail,
+                                                    chapters: data.chapters && data.chapters.length > 0 ? data.chapters : formData.chapters,
+                                                    last_chapter: data.chapters && data.chapters.length > 0 ? data.chapters[0].number : formData.last_chapter
                                                 });
-                                                alert('Data berhasil di-import!');
+                                                alert(`Berhasil! ${data.chapters?.length || 0} Chapter juga ikut ter-import.`);
                                             } catch (err: any) {
                                                 console.error('Import failed:', err);
                                                 alert(`Gagal Import: ${err.message}`);

@@ -49,13 +49,45 @@ export async function POST(req: NextRequest) {
         const image = $('meta[property="og:image"]').attr('content') ||
             $('meta[name="twitter:image"]').attr('content') || '';
 
+        // Add Image Proxy to thumbnail if it's an external URL
+        const proxyThumbnail = image ? `/api/proxy?url=${encodeURIComponent(image)}` : '';
+
+        // Extract Chapters (Targeting common structures like Madara/WP-Manga)
+        const chapters: any[] = [];
+        $('.main.version-chap li, li.wp-manga-chapter').each((i, el) => {
+            const a = $(el).find('a').first();
+            const date = $(el).find('.chapter-release-date').text().trim();
+            const title = a.text().trim();
+            const url = a.attr('href');
+
+            if (url) {
+                // Try to extract chapter number from title or URL
+                const numMatch = title.match(/Chapter\s+(\d+)/i) || url.match(/chapter-(\d+)/i);
+                const number = numMatch ? parseFloat(numMatch[1]) : 0;
+
+                chapters.push({
+                    id: `scraped-${Date.now()}-${i}`,
+                    number,
+                    title: title || `Chapter ${number}`,
+                    releasedAt: new Date().toISOString(), // Mocking date for now as parsing varied formats is tricky
+                    contentUrl: url,
+                    fileName: 'Scraped Link'
+                });
+            }
+        });
+
         // Clean up title
-        const cleanTitle = title.replace(/ - Asura Scans$/, '').replace(/ \| Asura Scans$/, '').trim();
+        const cleanTitle = title.replace(/ - Asura Scans$/, '')
+            .replace(/ \| Asura Scans$/, '')
+            .replace(/ - Manhwa-Raw$/, '')
+            .replace(/ – Manhwa-Raw$/, '')
+            .trim();
 
         return NextResponse.json({
             title: cleanTitle,
             description: description.trim(),
-            thumbnail: image,
+            thumbnail: proxyThumbnail || image,
+            chapters: chapters.sort((a, b) => b.number - a.number), // Newest first
             sourceUrl: url
         });
 
