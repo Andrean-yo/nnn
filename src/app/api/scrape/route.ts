@@ -49,45 +49,93 @@ export async function POST(req: NextRequest) {
         const image = $('meta[property="og:image"]').attr('content') ||
             $('meta[name="twitter:image"]').attr('content') || '';
 
-        // Add Image Proxy to thumbnail if it's an external URL
+        // Add Image Proxy to thumbnail
         const proxyThumbnail = image ? `/api/proxy?url=${encodeURIComponent(image)}` : '';
 
-        // Extract Chapters (Targeting common structures like Madara/WP-Manga)
-        const chapters: any[] = [];
-        $('.main.version-chap li, li.wp-manga-chapter').each((i, el) => {
-            const a = $(el).find('a').first();
-            const date = $(el).find('.chapter-release-date').text().trim();
-            const title = a.text().trim();
-            const url = a.attr('href');
+        // --- CHAPTER EXTRACTION LOGIC ---
+        let chapters: any[] = [];
 
-            if (url) {
-                // Try to extract chapter number from title or URL
-                const numMatch = title.match(/Chapter\s+(\d+)/i) || url.match(/chapter-(\d+)/i);
-                const number = numMatch ? parseFloat(numMatch[1]) : 0;
+        // 1. Try to find Manga ID for AJAX sites (Madara Theme like manhwa-raw.net)
+        const mangaId = $('.rating-post-id').val() || $('input[name="manga-id"]').val() ||
+            $('[data-id]').attr('data-id');
 
-                chapters.push({
-                    id: `scraped-${Date.now()}-${i}`,
-                    number,
-                    title: title || `Chapter ${number}`,
-                    releasedAt: new Date().toISOString(), // Mocking date for now as parsing varied formats is tricky
-                    contentUrl: url,
-                    fileName: 'Scraped Link'
+        if (mangaId && url.includes('manhwa-raw.net')) {
+            try {
+                const ajaxUrl = 'https://manhwa-raw.net/wp-admin/admin-ajax.php';
+                const body = new URLSearchParams();
+                body.append('action', 'manga_get_chapters');
+                body.append('manga', mangaId.toString());
+
+                const ajaxRes = await fetch(ajaxUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                    },
+                    body: body.toString()
                 });
+
+                if (ajaxRes.ok) {
+                    const ajaxHtml = await ajaxRes.text();
+                    const $c = cheerio.load(ajaxHtml);
+
+                    $c('.main.version-chap li, li.wp-manga-chapter').each((i, el) => {
+                        const a = $c(el).find('a').first();
+                        const title = a.text().trim();
+                        const chapterUrl = a.attr('href');
+
+                        if (chapterUrl) {
+                            const numMatch = title.match(/Chapter\s+(\d+)/i) || chapterUrl.match(/chapter-(\d+)/i);
+                            const number = numMatch ? parseFloat(numMatch[1]) : 0;
+                            chapters.push({
+                                id: `scraped-${Date.now()}-${i}`,
+                                number,
+                                title: title || `Chapter ${number}`,
+                                releasedAt: new Date().toISOString(),
+                                contentUrl: chapterUrl,
+                                fileName: 'Scraped Link'
+                            });
+                        }
+                    });
+                }
+            } catch (err) {
+                console.error('AJAX Chapter Scrape Failed:', err);
             }
-        });
+        }
+
+        // 2. Fallback: Static Extraction (For non-AJAX sites like Asura)
+        if (chapters.length === 0) {
+            $('.main.version-chap li, li.wp-manga-chapter, .chp-release-list li, .eplister li').each((i, el) => {
+                const a = $(el).find('a').first();
+                const title = a.text().trim();
+                const chapterUrl = a.attr('href');
+
+                if (chapterUrl) {
+                    const numMatch = title.match(/Chapter\s+(\d+)/i) || chapterUrl.match(/chapter-(\d+)/i);
+                    const number = numMatch ? parseFloat(numMatch[1]) : 0;
+                    chapters.push({
+                        id: `static-${Date.now()}-${i}`,
+                        number,
+                        title: title || `Chapter ${number}`,
+                        releasedAt: new Date().toISOString(),
+                        contentUrl: chapterUrl,
+                        fileName: 'Scraped Link'
+                    });
+                }
+            });
+        }
 
         // Clean up title
         const cleanTitle = title.replace(/ - Asura Scans$/, '')
             .replace(/ \| Asura Scans$/, '')
-            .replace(/ - Manhwa-Raw$/, '')
-            .replace(/ – Manhwa-Raw$/, '')
+            .replace(/ [-\|] Manhwa-Raw$/i, '')
             .trim();
 
         return NextResponse.json({
             title: cleanTitle,
             description: description.trim(),
             thumbnail: proxyThumbnail || image,
-            chapters: chapters.sort((a, b) => b.number - a.number), // Newest first
+            chapters: chapters.sort((a, b) => b.number - a.number),
             sourceUrl: url
         });
 
