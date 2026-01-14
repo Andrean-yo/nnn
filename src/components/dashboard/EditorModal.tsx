@@ -16,6 +16,7 @@ export function EditorModal({ isOpen, onClose, initialData, onSave, onDelete }: 
     const [formData, setFormData] = useState<Partial<Manhwa>>({});
     const [activeTab, setActiveTab] = useState<'details' | 'chapters'>('details');
     const [newChapterFile, setNewChapterFile] = useState<File | null>(null);
+    const [isScraping, setIsScraping] = useState(false);
 
     useEffect(() => {
         if (initialData) {
@@ -165,19 +166,25 @@ export function EditorModal({ isOpen, onClose, initialData, onSave, onDelete }: 
                                     />
                                     <button
                                         type="button"
+                                        disabled={isScraping}
                                         onClick={async () => {
                                             const urlInput = document.getElementById('import-url') as HTMLInputElement;
                                             const url = urlInput.value;
                                             if (!url) return;
 
+                                            setIsScraping(true);
                                             try {
                                                 const res = await fetch('/api/scrape', {
                                                     method: 'POST',
                                                     headers: { 'Content-Type': 'application/json' },
                                                     body: JSON.stringify({ url })
                                                 });
+
                                                 const data = await res.json();
-                                                if (data.error) throw new Error(data.error);
+
+                                                if (!res.ok) {
+                                                    throw new Error(data.error || `HTTP error! status: ${res.status}`);
+                                                }
 
                                                 setFormData({
                                                     ...formData,
@@ -185,14 +192,24 @@ export function EditorModal({ isOpen, onClose, initialData, onSave, onDelete }: 
                                                     description: data.description || formData.description,
                                                     thumbnail: data.thumbnail || formData.thumbnail
                                                 });
-                                            } catch (err) {
+                                                alert('Data berhasil di-import!');
+                                            } catch (err: any) {
                                                 console.error('Import failed:', err);
-                                                alert('Failed to import metadata. Check URL.');
+                                                alert(`Gagal Import: ${err.message}`);
+                                            } finally {
+                                                setIsScraping(false);
                                             }
                                         }}
-                                        className="px-4 py-2 bg-primary/20 text-primary hover:bg-primary/30 rounded-lg transition-all text-sm font-bold"
+                                        className="px-4 py-2 bg-primary/20 text-primary hover:bg-primary/30 rounded-lg transition-all text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                     >
-                                        Import
+                                        {isScraping ? (
+                                            <>
+                                                <div className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                                                <span>Importing...</span>
+                                            </>
+                                        ) : (
+                                            'Import'
+                                        )}
                                     </button>
                                 </div>
                                 <p className="text-[10px] text-gray-500">Auto-fills Title, Description, and Thumbnail from URL tags.</p>
