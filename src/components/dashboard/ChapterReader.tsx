@@ -80,18 +80,20 @@ export function ChapterReader({ manhwa, chapter, onClose, onNextChapter, onPrevC
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <div className="hidden sm:flex items-center gap-2">
+                        <div className="flex items-center gap-1 sm:gap-2">
                             <button
                                 onClick={onPrevChapter}
                                 disabled={!onPrevChapter}
-                                className="p-2 bg-white/5 hover:bg-white/10 disabled:opacity-30 rounded-lg transition-colors"
+                                className="p-1.5 sm:p-2 bg-white/5 hover:bg-white/10 disabled:opacity-10 rounded-lg transition-colors"
+                                title="Previous Chapter"
                             >
                                 <ChevronLeft className="w-5 h-5" />
                             </button>
                             <button
                                 onClick={onNextChapter}
                                 disabled={!onNextChapter}
-                                className="p-2 bg-white/5 hover:bg-white/10 disabled:opacity-30 rounded-lg transition-colors"
+                                className="p-1.5 sm:p-2 bg-white/5 hover:bg-white/10 disabled:opacity-10 rounded-lg transition-colors"
+                                title="Next Chapter"
                             >
                                 <ChevronRight className="w-5 h-5" />
                             </button>

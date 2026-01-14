@@ -17,6 +17,7 @@ export function EditorModal({ isOpen, onClose, initialData, onSave, onDelete }: 
     const [activeTab, setActiveTab] = useState<'details' | 'chapters'>('details');
     const [newChapterFile, setNewChapterFile] = useState<File | null>(null);
     const [manualChapterUrl, setManualChapterUrl] = useState('');
+    const [endChapterNum, setEndChapterNum] = useState<number | ''>('');
     const [isScraping, setIsScraping] = useState(false);
 
     useEffect(() => {
@@ -328,42 +329,69 @@ export function EditorModal({ isOpen, onClose, initialData, onSave, onDelete }: 
                                         <div className="flex-1 h-px bg-white/5"></div>
                                     </div>
 
-                                    {/* Option 2: URL Link */}
-                                    <div className="flex items-end gap-3">
-                                        <div className="flex-1 space-y-2">
-                                            <label className="text-xs text-gray-500">Option 2: Add via Link (URL)</label>
-                                            <input
-                                                type="url"
-                                                value={manualChapterUrl}
-                                                onChange={(e) => setManualChapterUrl(e.target.value)}
-                                                className="w-full px-3 py-2 bg-black/40 border border-white/10 rounded-lg text-sm focus:border-primary/50 outline-none"
-                                                placeholder="https://..."
-                                            />
+                                    {/* Option 2: URL Link (With Bulk Support) */}
+                                    <div className="space-y-3">
+                                        <div className="flex items-end gap-3">
+                                            <div className="flex-1 space-y-2">
+                                                <label className="text-xs text-gray-500">Option 2: Add via Link (URL)</label>
+                                                <input
+                                                    type="url"
+                                                    value={manualChapterUrl}
+                                                    onChange={(e) => setManualChapterUrl(e.target.value)}
+                                                    className="w-full px-3 py-2 bg-black/40 border border-white/10 rounded-lg text-sm focus:border-primary/50 outline-none"
+                                                    placeholder="https://.../chapter-1/"
+                                                />
+                                            </div>
+                                            <div className="w-24 space-y-2">
+                                                <label className="text-xs text-gray-500">Up to Ch</label>
+                                                <input
+                                                    type="number"
+                                                    value={endChapterNum}
+                                                    onChange={(e) => setEndChapterNum(e.target.value ? parseInt(e.target.value) : '')}
+                                                    className="w-full px-3 py-2 bg-black/40 border border-white/10 rounded-lg text-sm focus:border-primary/50 outline-none"
+                                                    placeholder="Exp: 10"
+                                                />
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    if (!manualChapterUrl) return;
+
+                                                    // Detect starting number in URL
+                                                    const match = manualChapterUrl.match(/chapter-(\d+)/i);
+                                                    const startNum = match ? parseInt(match[1]) : 1;
+                                                    const targetNum = endChapterNum || startNum;
+
+                                                    const newChapters = [];
+                                                    for (let i = startNum; i <= targetNum; i++) {
+                                                        const currentUrl = manualChapterUrl.replace(/chapter-\d+/i, `chapter-${i}`);
+                                                        newChapters.push({
+                                                            id: `manualbulk-${Date.now()}-${i}`,
+                                                            number: i,
+                                                            title: `Chapter ${i}`,
+                                                            releasedAt: new Date().toISOString(),
+                                                            contentUrl: currentUrl,
+                                                            fileName: 'Manual Link'
+                                                        });
+                                                    }
+
+                                                    setFormData({
+                                                        ...formData,
+                                                        chapters: [...newChapters, ...(formData.chapters || [])],
+                                                        last_chapter: Math.max(targetNum, (formData.last_chapter || 0))
+                                                    });
+
+                                                    setManualChapterUrl('');
+                                                    setEndChapterNum('');
+                                                }}
+                                                className="px-4 py-2 bg-white/10 text-white font-bold rounded-lg hover:bg-white/20 transition-all h-10 whitespace-nowrap"
+                                            >
+                                                {endChapterNum ? '+ Bulk Add' : '+ Add URL'}
+                                            </button>
                                         </div>
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                if (!manualChapterUrl) return;
-                                                const nextNum = (formData.chapters?.length || 0) + 1;
-                                                const newChapter = {
-                                                    id: `manual-${Date.now()}`,
-                                                    number: nextNum,
-                                                    title: `Chapter ${nextNum}`,
-                                                    releasedAt: new Date().toISOString(),
-                                                    contentUrl: manualChapterUrl,
-                                                    fileName: 'Manual Link'
-                                                };
-                                                setFormData({
-                                                    ...formData,
-                                                    chapters: [newChapter, ...(formData.chapters || [])],
-                                                    last_chapter: nextNum
-                                                });
-                                                setManualChapterUrl('');
-                                            }}
-                                            className="px-4 py-2 bg-white/10 text-white font-bold rounded-lg hover:bg-white/20 transition-all h-10"
-                                        >
-                                            + Add URL
-                                        </button>
+                                        <p className="text-[10px] text-gray-600 italic">
+                                            Tip: Masukkan URL Chapter 1, lalu isi "Up to Ch" ke 10 untuk menambah Chapter 1-10 secara otomatis.
+                                        </p>
                                     </div>
                                 </div>
                             </div>

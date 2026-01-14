@@ -92,15 +92,18 @@ export default function Home() {
                     <div className="max-w-[1920px] mx-auto px-6 py-4 flex items-center justify-between gap-8 h-20">
                         {/* Logo Area */}
                         <div className="flex items-center gap-4 shrink-0">
-                            <div className="relative w-48 h-12">
+                            <div className="relative w-20 h-20 overflow-hidden rounded-xl border border-white/10 shadow-xl">
                                 <Image
                                     src="/logo.png"
                                     alt="IndraScans"
                                     fill
-                                    className="object-contain object-left"
+                                    className="object-cover"
                                     priority
                                 />
                             </div>
+                            <span className="text-xl font-black italic tracking-tighter text-white hidden sm:block">
+                                INDRA<span className="text-primary text-2xl">SCANS</span>
+                            </span>
                         </div>
 
                         {/* Search Bar - Center */}
