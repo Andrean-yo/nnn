@@ -51,6 +51,7 @@ export function useManhwaData() {
                 // Map DB structure to App Interface if needed (snake_case to camelCase)
                 const formattedData: Manhwa[] = dbManhwas.map(m => ({
                     ...m,
+                    thumbnail: m.thumbnail_url || m.thumbnail, // Map database thumbnail_url to thumbnail
                     chapters: m.chapters ? m.chapters.map((c: any) => ({
                         id: c.id,
                         number: c.number,
