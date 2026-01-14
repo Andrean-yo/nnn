@@ -17,7 +17,9 @@ export function EditorModal({ isOpen, onClose, initialData, onSave, onDelete }: 
     const [activeTab, setActiveTab] = useState<'details' | 'chapters'>('details');
     const [newChapterFile, setNewChapterFile] = useState<File | null>(null);
     const [manualChapterUrl, setManualChapterUrl] = useState('');
+    const [startChapterNum, setStartChapterNum] = useState<number | ''>('');
     const [endChapterNum, setEndChapterNum] = useState<number | ''>('');
+    const [bulkTargetPattern, setBulkTargetPattern] = useState('');
     const [isScraping, setIsScraping] = useState(false);
 
     useEffect(() => {
@@ -329,69 +331,116 @@ export function EditorModal({ isOpen, onClose, initialData, onSave, onDelete }: 
                                         <div className="flex-1 h-px bg-white/5"></div>
                                     </div>
 
-                                    {/* Option 2: URL Link (With Bulk Support) */}
-                                    <div className="space-y-3">
+                                    {/* Option 2: URL Link (With Flexible Bulk Support) */}
+                                    <div className="space-y-4">
+                                        <div className="space-y-2">
+                                            <label className="text-xs text-gray-500">Full URL of First Chapter</label>
+                                            <input
+                                                type="url"
+                                                value={manualChapterUrl}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    setManualChapterUrl(val);
+                                                    // Auto-detect pattern: find the last number sequence
+                                                    const matches = val.match(/([a-zA-Z\-_]*)(\d+)([a-zA-Z\-_.]*)$/) || val.match(/([a-zA-Z\-_]*)(\d+)/g);
+                                                    if (matches && matches.length > 0) {
+                                                        const lastMatch = matches[matches.length - 1];
+                                                        setBulkTargetPattern(lastMatch);
+                                                        const numMatch = lastMatch.match(/\d+/);
+                                                        if (numMatch) setStartChapterNum(parseInt(numMatch[0]));
+                                                    }
+                                                }}
+                                                className="w-full px-3 py-2 bg-black/40 border border-white/10 rounded-lg text-sm focus:border-primary/50 outline-none"
+                                                placeholder="https://.../c355/1.html"
+                                            />
+                                        </div>
+
                                         <div className="flex items-end gap-3">
-                                            <div className="flex-1 space-y-2">
-                                                <label className="text-xs text-gray-500">Option 2: Add via Link (URL)</label>
+                                            <div className="w-40 space-y-2">
+                                                <label className="text-xs text-gray-500">Pattern to Change</label>
                                                 <input
-                                                    type="url"
-                                                    value={manualChapterUrl}
-                                                    onChange={(e) => setManualChapterUrl(e.target.value)}
-                                                    className="w-full px-3 py-2 bg-black/40 border border-white/10 rounded-lg text-sm focus:border-primary/50 outline-none"
-                                                    placeholder="https://.../chapter-1/"
+                                                    type="text"
+                                                    value={bulkTargetPattern}
+                                                    onChange={(e) => setBulkTargetPattern(e.target.value)}
+                                                    className="w-full px-3 py-2 bg-black/40 border border-white/10 rounded-lg text-sm focus:border-primary/50 outline-none text-primary font-mono"
+                                                    placeholder="Exp: c355"
                                                 />
                                             </div>
-                                            <div className="w-24 space-y-2">
-                                                <label className="text-xs text-gray-500">Up to Ch</label>
-                                                <input
-                                                    type="number"
-                                                    value={endChapterNum}
-                                                    onChange={(e) => setEndChapterNum(e.target.value ? parseInt(e.target.value) : '')}
-                                                    className="w-full px-3 py-2 bg-black/40 border border-white/10 rounded-lg text-sm focus:border-primary/50 outline-none"
-                                                    placeholder="Exp: 10"
-                                                />
+                                            <div className="flex-1 flex items-end gap-2">
+                                                <div className="flex-1 space-y-2">
+                                                    <label className="text-xs text-gray-500">From</label>
+                                                    <input
+                                                        type="number"
+                                                        value={startChapterNum}
+                                                        onChange={(e) => setStartChapterNum(e.target.value ? parseInt(e.target.value) : '')}
+                                                        className="w-full px-3 py-2 bg-black/40 border border-white/10 rounded-lg text-sm focus:border-primary/50 outline-none font-bold text-white"
+                                                    />
+                                                </div>
+                                                <div className="flex-1 space-y-2">
+                                                    <label className="text-xs text-gray-500">To</label>
+                                                    <input
+                                                        type="number"
+                                                        value={endChapterNum}
+                                                        onChange={(e) => setEndChapterNum(e.target.value ? parseInt(e.target.value) : '')}
+                                                        className="w-full px-3 py-2 bg-black/40 border border-white/10 rounded-lg text-sm focus:border-primary/50 outline-none font-bold text-white"
+                                                    />
+                                                </div>
                                             </div>
                                             <button
                                                 type="button"
                                                 onClick={() => {
-                                                    if (!manualChapterUrl) return;
+                                                    if (!manualChapterUrl || !bulkTargetPattern || startChapterNum === '' || endChapterNum === '') {
+                                                        alert('Harap isi URL, Pattern, From, dan To!');
+                                                        return;
+                                                    }
 
-                                                    // Detect starting number in URL
-                                                    const match = manualChapterUrl.match(/chapter-(\d+)/i);
-                                                    const startNum = match ? parseInt(match[1]) : 1;
-                                                    const targetNum = endChapterNum || startNum;
+                                                    const start = Number(startChapterNum);
+                                                    const end = Number(endChapterNum);
+
+                                                    // Extract prefix and original number for padding
+                                                    const prefix = bulkTargetPattern.match(/^[a-zA-Z\-_]*/)?.[0] || '';
+                                                    const origNumStr = bulkTargetPattern.match(/\d+/)?.[0] || '';
+                                                    const padding = origNumStr.length;
 
                                                     const newChapters = [];
-                                                    for (let i = startNum; i <= targetNum; i++) {
-                                                        const currentUrl = manualChapterUrl.replace(/chapter-\d+/i, `chapter-${i}`);
+                                                    for (let i = start; i <= end; i++) {
+                                                        // Format number with padding
+                                                        const newNumStr = i.toString().padStart(padding, '0');
+                                                        const newPattern = prefix + newNumStr;
+
+                                                        // Replace pattern in URL
+                                                        const currentUrl = manualChapterUrl.replace(bulkTargetPattern, newPattern);
+
                                                         newChapters.push({
-                                                            id: `manualbulk-${Date.now()}-${i}`,
+                                                            id: `bulk-${Date.now()}-${i}`,
                                                             number: i,
                                                             title: `Chapter ${i}`,
                                                             releasedAt: new Date().toISOString(),
                                                             contentUrl: currentUrl,
-                                                            fileName: 'Manual Link'
+                                                            fileName: 'Bulk Link'
                                                         });
                                                     }
 
                                                     setFormData({
                                                         ...formData,
                                                         chapters: [...newChapters, ...(formData.chapters || [])],
-                                                        last_chapter: Math.max(targetNum, (formData.last_chapter || 0))
+                                                        last_chapter: Math.max(end, (formData.last_chapter || 0))
                                                     });
 
+                                                    // Reset
                                                     setManualChapterUrl('');
+                                                    setBulkTargetPattern('');
+                                                    setStartChapterNum('');
                                                     setEndChapterNum('');
                                                 }}
-                                                className="px-4 py-2 bg-white/10 text-white font-bold rounded-lg hover:bg-white/20 transition-all h-10 whitespace-nowrap"
+                                                className="px-6 py-2 bg-primary text-black font-bold rounded-lg hover:bg-emerald-400 transition-all h-10 shadow-lg shadow-primary/20"
                                             >
-                                                {endChapterNum ? '+ Bulk Add' : '+ Add URL'}
+                                                + Bulk Insert
                                             </button>
                                         </div>
-                                        <p className="text-[10px] text-gray-600 italic">
-                                            Tip: Masukkan URL Chapter 1, lalu isi "Up to Ch" ke 10 untuk menambah Chapter 1-10 secara otomatis.
-                                        </p>
+                                        <div className="p-3 bg-white/5 rounded-lg text-[10px] text-gray-500 space-y-1">
+                                            <p><span className="text-primary font-bold">CARA PAKAI:</span> Copy URL chapter (misal: <code className="text-white">.../c355/1.html</code>). Isi Pattern bagian mana yang mau diubah (misal: <code className="text-white">c355</code>). Masukkan rentang chapter (Dari misal 1 Sampai 10). Sistem akan membuat <code className="text-white">c001, c002 ... c010</code> otomatis.</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
