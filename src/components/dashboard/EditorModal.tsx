@@ -1,6 +1,6 @@
 import { Manhwa } from '@/types';
 import { cn } from '@/lib/utils';
-import { X, Save, Trash2 } from 'lucide-react';
+import { X, Save, Trash2, Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 
@@ -151,6 +151,53 @@ export function EditorModal({ isOpen, onClose, initialData, onSave, onDelete }: 
                 <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
                     {activeTab === 'details' ? (
                         <form id="details-form" onSubmit={handleSubmit} className="space-y-6">
+                            <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl space-y-3">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <Sparkles className="w-4 h-4 text-primary" />
+                                    <span className="text-xs font-bold text-primary uppercase tracking-wider">Quick Import</span>
+                                </div>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="url"
+                                        id="import-url"
+                                        className="flex-1 px-4 py-2 bg-black/40 border border-white/5 rounded-lg focus:border-primary/50 outline-none text-sm"
+                                        placeholder="Paste manhwa URL (Asura, Reaper, etc.)"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={async () => {
+                                            const urlInput = document.getElementById('import-url') as HTMLInputElement;
+                                            const url = urlInput.value;
+                                            if (!url) return;
+
+                                            try {
+                                                const res = await fetch('/api/scrape', {
+                                                    method: 'POST',
+                                                    headers: { 'Content-Type': 'application/json' },
+                                                    body: JSON.stringify({ url })
+                                                });
+                                                const data = await res.json();
+                                                if (data.error) throw new Error(data.error);
+
+                                                setFormData({
+                                                    ...formData,
+                                                    title: data.title || formData.title,
+                                                    description: data.description || formData.description,
+                                                    thumbnail: data.thumbnail || formData.thumbnail
+                                                });
+                                            } catch (err) {
+                                                console.error('Import failed:', err);
+                                                alert('Failed to import metadata. Check URL.');
+                                            }
+                                        }}
+                                        className="px-4 py-2 bg-primary/20 text-primary hover:bg-primary/30 rounded-lg transition-all text-sm font-bold"
+                                    >
+                                        Import
+                                    </button>
+                                </div>
+                                <p className="text-[10px] text-gray-500">Auto-fills Title, Description, and Thumbnail from URL tags.</p>
+                            </div>
+
                             <div className="space-y-2">
                                 <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Title</label>
                                 <input
