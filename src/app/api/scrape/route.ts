@@ -12,28 +12,40 @@ export async function POST(req: NextRequest) {
 
         const response = await fetch(url, {
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Referer': 'https://www.google.com/'
             }
         });
 
         if (!response.ok) {
-            return NextResponse.json({ error: 'Failed to fetch the URL' }, { status: 500 });
+            return NextResponse.json({ error: `Failed to fetch: ${response.statusText}` }, { status: response.status });
         }
 
         const html = await response.text();
         const $ = cheerio.load(html);
 
-        // Metadata extraction logic (OpenGraph as standard)
+        // Metadata extraction logic
         const title = $('meta[property="og:title"]').attr('content') || $('title').text() || '';
-        const description = $('meta[property="og:description"]').attr('content') || $('meta[name="description"]').attr('content') || '';
-        const image = $('meta[property="og:image"]').attr('content') || '';
 
-        // Clean up title (remove site names often found in titles)
-        const cleanTitle = title.split(' - ')[0].split(' | ')[0].trim();
+        // Handle broken [object Object] description from Asura Scans
+        let description = $('meta[property="og:description"]').attr('content') || '';
+        if (description.includes('[object Object]') || !description) {
+            // Fallback to searching for summary in the body
+            description = $('.series-synopsis, .summary__content, .entry-content p, #description-text').first().text() ||
+                $('meta[name="description"]').attr('content') || '';
+        }
+
+        const image = $('meta[property="og:image"]').attr('content') ||
+            $('meta[name="twitter:image"]').attr('content') || '';
+
+        // Clean up title
+        const cleanTitle = title.replace(/ - Asura Scans$/, '').replace(/ \| Asura Scans$/, '').trim();
 
         return NextResponse.json({
             title: cleanTitle,
-            description,
+            description: description.trim(),
             thumbnail: image,
             sourceUrl: url
         });
