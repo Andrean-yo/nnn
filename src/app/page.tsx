@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useManhwaData } from "@/hooks/useManhwaData";
 import { ManhwaGrid } from "@/components/dashboard/ManhwaGrid";
@@ -32,6 +33,20 @@ export default function Home() {
 
     const { data, isLoading, updateManhwa, addManhwa, deleteManhwa } = useManhwaData();
     const { isAuthenticated, user, login, register, logout } = useAuth();
+    const searchParams = useSearchParams();
+    const router = useRouter();
+
+    // Restore state from URL on load
+    useEffect(() => {
+        const manhwaId = searchParams.get('manhwaId');
+        if (manhwaId && data.length > 0) {
+            const manhwa = data.find(m => m.id === manhwaId);
+            if (manhwa) {
+                setSelectedManhwa(manhwa);
+                setIsDetailOpen(true);
+            }
+        }
+    }, [searchParams, data]);
 
     const filteredData = data.filter(item =>
         item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -44,6 +59,10 @@ export default function Home() {
             setIsEditorOpen(true);
         } else {
             setIsDetailOpen(true);
+            // Update URL
+            const params = new URLSearchParams(searchParams.toString());
+            params.set('manhwaId', item.id);
+            router.push(`?${params.toString()}`, { scroll: false });
         }
     };
 
@@ -280,7 +299,11 @@ export default function Home() {
             {/* DetailModal - for everyone */}
             <DetailModal
                 isOpen={isDetailOpen}
-                onClose={() => setIsDetailOpen(false)}
+                onClose={() => {
+                    setIsDetailOpen(false);
+                    // Clear URL
+                    router.push('/', { scroll: false });
+                }}
                 manhwa={selectedManhwa}
             />
 

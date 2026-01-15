@@ -2,7 +2,8 @@ import { Manhwa, Chapter } from '@/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Star, Calendar, BookOpen, User, Tag } from 'lucide-react';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { ChapterReader } from './ChapterReader';
 
 interface DetailModalProps {
@@ -13,38 +14,61 @@ interface DetailModalProps {
 
 export function DetailModal({ isOpen, onClose, manhwa }: DetailModalProps) {
     const [readingChapter, setReadingChapter] = useState<Chapter | null>(null);
+    const searchParams = useSearchParams();
+    const router = useRouter();
+
+    // Restore reading state from URL
+    useEffect(() => {
+        if (isOpen && manhwa && manhwa.chapters) {
+            const chapterId = searchParams.get('chapterId');
+            if (chapterId) {
+                const chapter = manhwa.chapters.find(c => c.id === chapterId);
+                if (chapter) setReadingChapter(chapter);
+            }
+        }
+    }, [isOpen, manhwa, searchParams]);
 
     if (!isOpen || !manhwa) return null;
 
     const handleRead = (chapter: Chapter) => {
         setReadingChapter(chapter);
+        // Update URL
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('manhwaId', manhwa.id);
+        params.set('chapterId', chapter.id);
+        router.push(`?${params.toString()}`, { scroll: false });
     };
 
     const handleCloseReader = () => {
         setReadingChapter(null);
+        // Clear chapter from URL but keep manhwa
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete('chapterId');
+        router.push(`?${params.toString()}`, { scroll: false });
+    };
+
+    const updateUrlForChapter = (chapter: Chapter) => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('chapterId', chapter.id);
+        router.push(`?${params.toString()}`, { scroll: false });
     };
 
     const handleNextChapter = () => {
         if (!readingChapter || !manhwa.chapters) return;
-        const currentIndex = manhwa.chapters.findIndex(c => c.id === readingChapter.id);
-        // Assuming chapters are ordered descending (newest first), next chapter is index - 1 ? 
-        // OR if ordered ascending/logical. Let's assume standard order:
-        // Usually index 0 is latest. So "Next" chapter (reading forward) would be index - 1 if we are reading backwards?
-        // Let's check typical sorting. Usually Chapter 10, 9, 8.
-        // If I am on Chapter 9 (index 1), "Next" is Chapter 10 (index 0).
-        // If I am on Chapter 10 (index 0), there is no next.
-        // Wait, "Next Chapter" usually means *sequentially* next. Chapter 1 -> Chapter 2.
-        // If list is 10, 9, ... 1.
-        // I am on 1. Next is 2.
-        // So I need to find the chapter with Number + 1.
         const nextChapter = manhwa.chapters.find(c => c.number === readingChapter.number + 1);
-        if (nextChapter) setReadingChapter(nextChapter);
+        if (nextChapter) {
+            setReadingChapter(nextChapter);
+            updateUrlForChapter(nextChapter);
+        }
     };
 
     const handlePrevChapter = () => {
         if (!readingChapter || !manhwa.chapters) return;
         const prevChapter = manhwa.chapters.find(c => c.number === readingChapter.number - 1);
-        if (prevChapter) setReadingChapter(prevChapter);
+        if (prevChapter) {
+            setReadingChapter(prevChapter);
+            updateUrlForChapter(prevChapter);
+        }
     };
 
     // If reading, only show the Reader

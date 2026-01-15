@@ -12,6 +12,12 @@ interface AdsterraAdProps {
     onClick?: () => void;
 }
 
+declare global {
+    interface Window {
+        atOptions?: any;
+    }
+}
+
 export function AdsterraAd({ type, hash, width = 728, height = 90, className, onClick }: AdsterraAdProps) {
     const adRef = useRef<HTMLDivElement>(null);
 
@@ -26,23 +32,19 @@ export function AdsterraAd({ type, hash, width = 728, height = 90, className, on
             // Clear previous content
             container.innerHTML = '';
 
-            const config = document.createElement('script');
-            config.type = 'text/javascript';
-            config.innerHTML = `
-                atOptions = {
-                    'key' : '${hash}',
-                    'format' : 'iframe',
-                    'height' : ${height},
-                    'width' : ${width},
-                    'params' : {}
-                };
-            `;
+            // Set atOptions on window so invoke.js can find it
+            window.atOptions = {
+                'key': hash,
+                'format': 'iframe',
+                'height': height,
+                'width': width,
+                'params': {}
+            };
 
             const script = document.createElement('script');
             script.type = 'text/javascript';
             script.src = `//www.highperformanceformat.com/${hash}/invoke.js`;
 
-            container.appendChild(config);
             container.appendChild(script);
         } else if (type === 'social_bar' || type === 'popunder') {
             const scriptId = `adsterra-${type}-${hash}`;
@@ -52,13 +54,12 @@ export function AdsterraAd({ type, hash, width = 728, height = 90, className, on
             script.id = scriptId;
             script.type = 'text/javascript';
             script.async = true;
-            // Support the specific format provided by user: https://DOMAIN/62/1b/ac/HASH.js
-            // If hash is full 621bac8006c680bccb3a616d1962ae68, path is 62/1b/ac/
+            // Use the specific domain provided by the user
             const path = `${hash.substring(0, 2)}/${hash.substring(2, 4)}/${hash.substring(4, 6)}/`;
             script.src = `https://pl28482902.effectivegatecpm.com/${path}${hash}.js`;
             document.body.appendChild(script);
         }
-    }, [type, hash]);
+    }, [type, hash, width, height]);
 
     if (type === 'banner') {
         return <div ref={adRef} className={className} />;
