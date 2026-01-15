@@ -13,7 +13,7 @@ import { LoginModal } from "@/components/auth/LoginModal";
 import { RegisterModal } from "@/components/auth/RegisterModal";
 import { Manhwa } from "@/types";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Sparkles, Grid3x3, LogIn, UserPlus, User, LogOut, Heart } from "lucide-react";
+import { Search, Sparkles, Grid3x3, LogIn, UserPlus, User, LogOut, Heart, X } from "lucide-react";
 import Image from "next/image";
 
 export default function Home() {
@@ -28,6 +28,7 @@ export default function Home() {
     const [showRegister, setShowRegister] = useState(false);
     const [showUserView, setShowUserView] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
+    const [isSearchVisible, setIsSearchVisible] = useState(false);
 
     const { data, isLoading, updateManhwa, addManhwa, deleteManhwa } = useManhwaData();
     const { isAuthenticated, user, login, register, logout } = useAuth();
@@ -88,128 +89,152 @@ export default function Home() {
             {/* Main Content */}
             <main className={`min-h-screen bg-[#0b0d10] text-white ${isDeveloper ? 'lg:pl-20' : ''}`}>
                 {/* Header */}
-                <header className="sticky top-0 z-30 backdrop-blur-xl bg-[#0b0d10]/80 border-b border-white/5 shadow-2xl shadow-black/50">
-                    <div className="max-w-[1920px] mx-auto px-6 py-4 flex items-center justify-between gap-8 h-20">
-                        {/* Logo Area */}
-                        <div className="flex items-center gap-4 shrink-0">
-                            <div className="relative w-20 h-20 overflow-hidden rounded-xl border border-white/10 shadow-xl">
-                                <Image
-                                    src="/logo.png"
-                                    alt="IndraScans"
-                                    fill
-                                    className="object-cover"
-                                    priority
-                                />
-                            </div>
-                            <span className="text-xl font-black italic tracking-tighter text-white hidden sm:block">
-                                INDRA<span className="text-primary text-2xl">SCANS</span>
-                            </span>
-                        </div>
-
-                        {/* Search Bar - Center */}
-                        <div className="flex-1 max-w-2xl">
-                            <div className="relative group">
-                                <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-500 group-focus-within:text-primary transition-colors" />
-                                <input
-                                    type="text"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    placeholder="Search..."
-                                    className="w-full pl-9 sm:pl-12 pr-4 py-2 sm:py-3 bg-[#16191e] border border-white/5 rounded-xl focus:border-primary/50 focus:ring-1 focus:ring-primary/50 outline-none transition-all text-sm sm:text-base text-white placeholder:text-gray-600 shadow-inner"
-                                />
-                            </div>
-                        </div>
-
-                        {/* Right Actions */}
-                        <div className="flex items-center gap-4 shrink-0">
-                            {/* Mode Toggle - for developers */}
-                            {isDeveloper && (
-                                <button
-                                    onClick={() => setGravityMode(!gravityMode)}
-                                    className="group relative flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-primary/10 to-emerald-600/10 border border-primary/20 rounded-xl hover:border-primary/50 transition-all duration-300 overflow-hidden"
-                                >
-                                    <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/10 to-primary/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-
-                                    <AnimatePresence mode="wait">
-                                        {gravityMode ? (
-                                            <motion.div
-                                                key="grid"
-                                                initial={{ rotate: -180, opacity: 0 }}
-                                                animate={{ rotate: 0, opacity: 1 }}
-                                                exit={{ rotate: 180, opacity: 0 }}
-                                                transition={{ duration: 0.3 }}
-                                                className="relative z-10"
-                                            >
-                                                <Grid3x3 className="w-5 h-5 text-primary" />
-                                            </motion.div>
-                                        ) : (
-                                            <motion.div
-                                                key="sparkles"
-                                                initial={{ rotate: -180, opacity: 0 }}
-                                                animate={{ rotate: 0, opacity: 1 }}
-                                                exit={{ rotate: 180, opacity: 0 }}
-                                                transition={{ duration: 0.3 }}
-                                                className="relative z-10"
-                                            >
-                                                <Sparkles className="w-5 h-5 text-primary" />
-                                            </motion.div>
-                                        )}
-                                    </AnimatePresence>
-                                </button>
-                            )}
-
-                            {/* User Features Button - for regular users */}
-                            {!isDeveloper && isAuthenticated && user?.role === 'user' && (
-                                <button
-                                    onClick={handleUserViewClick}
-                                    className="flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 rounded-lg hover:bg-primary/20 transition-colors"
-                                >
-                                    <Heart className="w-4 h-4 text-primary" />
-                                    <span className="text-sm text-primary font-medium">My Favorites</span>
-                                </button>
-                            )}
-
-                            {/* Auth Buttons */}
-                            {!isAuthenticated ? (
-                                <div className="flex items-center gap-3">
-                                    <button
-                                        onClick={() => setShowLogin(true)}
-                                        className="flex items-center gap-2 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
-                                    >
-                                        <LogIn className="w-4 h-4" />
-                                        <span className="text-sm">Login</span>
-                                    </button>
-                                    <button
-                                        onClick={() => setShowRegister(true)}
-                                        className="flex items-center gap-2 px-4 py-2 bg-primary text-black font-bold rounded-lg hover:bg-emerald-400 transition-all shadow-[0_0_15px_-5px_#34d399]"
-                                    >
-                                        <UserPlus className="w-4 h-4" />
-                                        <span className="text-sm">Register</span>
-                                    </button>
+                <header className="sticky top-0 z-30 backdrop-blur-xl bg-[#0b0d10]/90 border-b border-white/5 shadow-2xl">
+                    <div className="max-w-[1920px] mx-auto px-4 sm:px-6 py-2 sm:py-4 flex flex-col gap-2">
+                        {/* Top Row */}
+                        <div className="flex items-center justify-between gap-4 h-14 sm:h-20">
+                            {/* Logo Area */}
+                            <div className="flex items-center gap-3 shrink-0">
+                                <div className="relative w-12 h-12 sm:w-16 sm:h-16 overflow-hidden rounded-xl border border-white/10 shadow-lg">
+                                    <Image
+                                        src="/logo.png"
+                                        alt="IndraScans"
+                                        fill
+                                        className="object-cover"
+                                        priority
+                                    />
                                 </div>
-                            ) : (
-                                <>
-                                    <div className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-lg border border-white/5">
-                                        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-emerald-600 flex items-center justify-center font-bold text-black text-xs">
+                                <span className="text-lg sm:text-xl font-black italic tracking-tighter text-white hidden xs:block">
+                                    INDRA<span className="text-primary text-xl sm:text-2xl">SCANS</span>
+                                </span>
+                            </div>
+
+                            {/* Search Bar - Desktop */}
+                            <div className="flex-1 max-w-2xl hidden md:block">
+                                <div className="relative group">
+                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-primary transition-colors" />
+                                    <input
+                                        type="text"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        placeholder="Cari manhwa..."
+                                        className="w-full pl-12 pr-4 py-3 bg-[#16191e] border border-white/5 rounded-xl focus:border-primary/50 focus:ring-1 focus:ring-primary/50 outline-none transition-all text-white placeholder:text-gray-600 shadow-inner"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Right Actions */}
+                            <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+                                {/* Mobile Search Toggle */}
+                                <button
+                                    onClick={() => setIsSearchVisible(!isSearchVisible)}
+                                    className="p-2 sm:p-3 bg-white/5 border border-white/5 rounded-xl hover:bg-white/10 transition-colors md:hidden text-gray-400 hover:text-primary"
+                                >
+                                    <Search className="w-5 h-5" />
+                                </button>
+
+                                {/* Mode Toggle - for developers */}
+                                {isDeveloper && (
+                                    <button
+                                        onClick={() => setGravityMode(!gravityMode)}
+                                        className="p-2 sm:p-3 bg-primary/10 border border-primary/20 rounded-xl hover:bg-primary/20 transition-all md:px-6 md:py-3 md:flex md:items-center md:gap-3"
+                                    >
+                                        <AnimatePresence mode="wait">
+                                            {gravityMode ? (
+                                                <Grid3x3 className="w-5 h-5 text-primary" />
+                                            ) : (
+                                                <Sparkles className="w-5 h-5 text-primary" />
+                                            )}
+                                        </AnimatePresence>
+                                        <span className="hidden md:block text-sm font-bold text-primary">
+                                            {gravityMode ? 'Classic View' : 'Chaos Mode'}
+                                        </span>
+                                    </button>
+                                )}
+
+                                {/* Favorites Button */}
+                                {!isDeveloper && isAuthenticated && user?.role === 'user' && (
+                                    <button
+                                        onClick={handleUserViewClick}
+                                        className="p-2 sm:p-3 bg-primary/10 border border-primary/20 rounded-xl hover:bg-primary/20 transition-colors md:px-4 md:py-2 md:flex md:items-center md:gap-2 text-primary"
+                                    >
+                                        <Heart className="w-5 h-5" />
+                                        <span className="hidden md:block text-sm font-medium">My Favorites</span>
+                                    </button>
+                                )}
+
+                                {/* Auth Section */}
+                                {!isAuthenticated ? (
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => setShowLogin(true)}
+                                            className="p-2 text-gray-400 hover:text-white sm:px-4 sm:py-2 sm:text-sm"
+                                        >
+                                            <LogIn className="w-5 h-5 sm:hidden" />
+                                            <span className="hidden sm:inline">Login</span>
+                                        </button>
+                                        <button
+                                            onClick={() => setShowRegister(true)}
+                                            className="hidden xs:flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 bg-primary text-black font-bold rounded-lg text-xs sm:text-sm"
+                                        >
+                                            <UserPlus className="w-4 h-4" />
+                                            <span>Join</span>
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center gap-2 p-1 bg-white/5 rounded-xl border border-white/5">
+                                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-tr from-primary to-emerald-600 flex items-center justify-center font-bold text-black text-xs sm:text-sm">
                                             {user?.email[0].toUpperCase()}
                                         </div>
-                                        <span className="text-sm text-gray-300 hidden xl:block">{user?.email}</span>
                                         {isDeveloper && (
-                                            <span className="ml-2 px-2 py-0.5 text-[10px] bg-primary/20 text-primary rounded-full font-bold uppercase tracking-wider">
-                                                DEV
-                                            </span>
+                                            <span className="hidden sm:block px-2 py-0.5 text-[10px] bg-primary/20 text-primary rounded-full font-bold">DEV</span>
                                         )}
+                                        <button
+                                            onClick={logout}
+                                            className="p-1 sm:p-2 text-gray-400 hover:text-red-400 transition-colors"
+                                            title="Logout"
+                                        >
+                                            <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
+                                        </button>
                                     </div>
-                                    <button
-                                        onClick={logout}
-                                        className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
-                                        title="Logout"
-                                    >
-                                        <LogOut className="w-5 h-5" />
-                                    </button>
-                                </>
-                            )}
+                                )}
+                            </div>
                         </div>
+
+                        {/* Mobile Search Row - Expandable */}
+                        <AnimatePresence>
+                            {isSearchVisible && (
+                                <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    className="md:hidden overflow-hidden pb-2"
+                                >
+                                    <div className="relative flex items-center gap-2">
+                                        <div className="relative flex-1">
+                                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-primary" />
+                                            <input
+                                                type="text"
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                placeholder="Cari manhwa..."
+                                                autoFocus
+                                                className="w-full pl-12 pr-4 py-3 bg-[#16191e] border border-primary/30 rounded-xl outline-none text-white text-base shadow-xl placeholder:text-gray-600"
+                                            />
+                                        </div>
+                                        <button
+                                            onClick={() => {
+                                                setIsSearchVisible(false);
+                                                setSearchQuery('');
+                                            }}
+                                            className="p-3 bg-white/5 rounded-xl text-gray-400"
+                                        >
+                                            <X className="w-5 h-5" />
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
                 </header>
 
