@@ -4,6 +4,7 @@ import { Manhwa, Chapter } from '@/types';
 import { X, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AdsterraAd } from '../ads/AdsterraAd';
+import { ADSTERRA_CONFIG } from '@/config/ads';
 
 interface ChapterReaderProps {
     manhwa: Manhwa;
@@ -93,10 +94,10 @@ export function ChapterReader({ manhwa, chapter, onClose, onNextChapter, onPrevC
                                 >
                                     <ChevronLeft className="w-5 h-5" />
                                 </button>
-                                {!hasClickedAd && (
+                                {!hasClickedAd && ADSTERRA_CONFIG.DIRECT_LINK && (
                                     <AdsterraAd
                                         type="direct_link"
-                                        hash="https://www.highperformanceformat.com/YOUR_DIRECT_LINK"
+                                        hash={ADSTERRA_CONFIG.DIRECT_LINK}
                                         onClick={() => setHasClickedAd(true)}
                                     />
                                 )}
@@ -110,10 +111,10 @@ export function ChapterReader({ manhwa, chapter, onClose, onNextChapter, onPrevC
                                 >
                                     <ChevronRight className="w-5 h-5" />
                                 </button>
-                                {!hasClickedAd && (
+                                {!hasClickedAd && ADSTERRA_CONFIG.DIRECT_LINK && (
                                     <AdsterraAd
                                         type="direct_link"
-                                        hash="https://www.highperformanceformat.com/YOUR_DIRECT_LINK"
+                                        hash={ADSTERRA_CONFIG.DIRECT_LINK}
                                         onClick={() => setHasClickedAd(true)}
                                     />
                                 )}
@@ -138,7 +139,7 @@ export function ChapterReader({ manhwa, chapter, onClose, onNextChapter, onPrevC
                             type="banner"
                             width={728}
                             height={90}
-                            hash="PLACEHOLDER_HASH_TOP" // Replace with your 728x90 hash
+                            hash={ADSTERRA_CONFIG.BANNER_TOP}
                             className="w-full h-full"
                         />
                         <span className="absolute">AD SLOT: 728x90 Top Banner</span>
@@ -184,7 +185,7 @@ export function ChapterReader({ manhwa, chapter, onClose, onNextChapter, onPrevC
                                 type="banner"
                                 width={728}
                                 height={90}
-                                hash="PLACEHOLDER_HASH_BOTTOM" // Replace with your 728x90 hash
+                                hash={ADSTERRA_CONFIG.BANNER_BOTTOM}
                                 className="w-full h-full"
                             />
                             {/* If hash is missing, show placeholder for dev */}
@@ -205,10 +206,10 @@ export function ChapterReader({ manhwa, chapter, onClose, onNextChapter, onPrevC
                                 >
                                     Previous
                                 </button>
-                                {!hasClickedAd && (
+                                {!hasClickedAd && ADSTERRA_CONFIG.DIRECT_LINK && (
                                     <AdsterraAd
                                         type="direct_link"
-                                        hash="https://www.highperformanceformat.com/YOUR_DIRECT_LINK"
+                                        hash={ADSTERRA_CONFIG.DIRECT_LINK}
                                         onClick={() => setHasClickedAd(true)}
                                     />
                                 )}
@@ -221,10 +222,10 @@ export function ChapterReader({ manhwa, chapter, onClose, onNextChapter, onPrevC
                                 >
                                     Next Chapter
                                 </button>
-                                {!hasClickedAd && (
+                                {!hasClickedAd && ADSTERRA_CONFIG.DIRECT_LINK && (
                                     <AdsterraAd
                                         type="direct_link"
-                                        hash="https://www.highperformanceformat.com/YOUR_DIRECT_LINK"
+                                        hash={ADSTERRA_CONFIG.DIRECT_LINK}
                                         onClick={() => setHasClickedAd(true)}
                                     />
                                 )}
@@ -234,7 +235,7 @@ export function ChapterReader({ manhwa, chapter, onClose, onNextChapter, onPrevC
                         {/* SOCIAL BAR / POP-UNDER SCRIPT */}
                         <AdsterraAd
                             type="social_bar"
-                            hash="621bac8006c680bccb3a616d1962ae68" // User provided hash
+                            hash={ADSTERRA_CONFIG.SOCIAL_BAR}
                         />
                     </div>
                 </div>
