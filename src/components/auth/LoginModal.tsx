@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { X, LogIn, UserPlus } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { X, LogIn } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface LoginModalProps {
     isOpen: boolean;
@@ -33,12 +33,6 @@ export function LoginModal({ isOpen, onClose, onLogin, onSwitchToRegister }: Log
         }
     };
 
-    const fillDeveloperCredentials = () => {
-        setEmail('dev@indra.com');
-        setPassword('dev123');
-        setActiveTab('developer');
-    };
-
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-in fade-in duration-200">
             <motion.div
@@ -68,8 +62,8 @@ export function LoginModal({ isOpen, onClose, onLogin, onSwitchToRegister }: Log
                     <button
                         onClick={() => setActiveTab('user')}
                         className={`flex-1 py-3 text-sm font-medium transition-colors relative ${activeTab === 'user'
-                                ? 'text-primary'
-                                : 'text-gray-400 hover:text-gray-200'
+                            ? 'text-primary'
+                            : 'text-gray-400 hover:text-gray-200'
                             }`}
                     >
                         User Login
@@ -83,8 +77,8 @@ export function LoginModal({ isOpen, onClose, onLogin, onSwitchToRegister }: Log
                     <button
                         onClick={() => setActiveTab('developer')}
                         className={`flex-1 py-3 text-sm font-medium transition-colors relative ${activeTab === 'developer'
-                                ? 'text-primary'
-                                : 'text-gray-400 hover:text-gray-200'
+                            ? 'text-primary'
+                            : 'text-gray-400 hover:text-gray-200'
                             }`}
                     >
                         Developer
@@ -99,21 +93,6 @@ export function LoginModal({ isOpen, onClose, onLogin, onSwitchToRegister }: Log
 
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                    {activeTab === 'developer' && (
-                        <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg">
-                            <p className="text-xs text-primary">
-                                Developer credentials: <strong>dev@indra.com</strong> / <strong>dev123</strong>
-                            </p>
-                            <button
-                                type="button"
-                                onClick={fillDeveloperCredentials}
-                                className="mt-2 text-xs text-primary hover:underline"
-                            >
-                                Click to auto-fill
-                            </button>
-                        </div>
-                    )}
-
                     <div className="space-y-2">
                         <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">
                             Email
