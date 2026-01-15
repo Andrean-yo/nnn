@@ -17,7 +17,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search, Sparkles, Grid3x3, LogIn, UserPlus, User, LogOut, Heart, X } from "lucide-react";
 import Image from "next/image";
 
-export default function Home() {
+import { Suspense } from "react";
+
+function HomeContent() {
     const [gravityMode, setGravityMode] = useState(false);
 
     // Split modal states
@@ -99,6 +101,17 @@ export default function Home() {
 
     // Show developer dashboard if developer is logged in
     const isDeveloper = isAuthenticated && user?.role === 'developer';
+
+    if (isLoading && !selectedManhwa) {
+        return (
+            <div className="min-h-screen bg-[#0b0d10] flex items-center justify-center">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                    <span className="text-primary font-bold animate-pulse text-lg tracking-widest uppercase">IndraScans</span>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <>
@@ -328,6 +341,21 @@ export default function Home() {
                 }}
             />
         </>
+    );
+}
+
+export default function Home() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-[#0b0d10] flex items-center justify-center">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                    <span className="text-primary font-bold animate-pulse">Loading Experience...</span>
+                </div>
+            </div>
+        }>
+            <HomeContent />
+        </Suspense>
     );
 }
 
