@@ -1,9 +1,7 @@
 
 export const ADSTERRA_CONFIG = {
     // 1. PINDAHKAN URL DIRECT LINK ANDA KE SINI
-    // Link ini didapat dari dashboard Adsterra -> Direct Links
-    // Contoh: https://www.highperformanceformat.com/abcdef123
-    DIRECT_LINK: "https://www.highperformanceformat.com/YOUR_DIRECT_LINK",
+    DIRECT_LINK: "https://www.effectivegatecpm.com/iiqq1408bs?key=e736b80acd326b8a5304a4f390c45c89",
 
     // 2. PINDAHKAN HASH BANNER 728x90 KE SINI
     // Didapat dari dashboard Adsterra -> Banners -> 728x90
