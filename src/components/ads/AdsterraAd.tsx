@@ -4,30 +4,27 @@ import { useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
 interface AdsterraAdProps {
-    type: 'banner_728x90' | 'social_bar' | 'popunder' | 'direct_link';
+    type: 'banner' | 'social_bar' | 'popunder' | 'direct_link';
     hash?: string; // The hash key or Direct Link URL
+    width?: number;
+    height?: number;
     className?: string;
     onClick?: () => void;
 }
 
-export function AdsterraAd({ type, hash, className, onClick }: AdsterraAdProps) {
+export function AdsterraAd({ type, hash, width = 728, height = 90, className, onClick }: AdsterraAdProps) {
     const adRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         // Only run on client
         if (typeof window === 'undefined' || !hash) return;
 
-        if (type === 'banner_728x90') {
+        if (type === 'banner') {
             const container = adRef.current;
             if (!container) return;
 
             // Clear previous content
             container.innerHTML = '';
-
-            const script = document.createElement('script');
-            script.type = 'text/javascript';
-            script.async = true;
-            script.src = `//www.highperformanceformat.com/${hash}/invoke.js`;
 
             const config = document.createElement('script');
             config.type = 'text/javascript';
@@ -35,11 +32,15 @@ export function AdsterraAd({ type, hash, className, onClick }: AdsterraAdProps) 
                 atOptions = {
                     'key' : '${hash}',
                     'format' : 'iframe',
-                    'height' : 90,
-                    'width' : 728,
+                    'height' : ${height},
+                    'width' : ${width},
                     'params' : {}
                 };
             `;
+
+            const script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.src = `//www.highperformanceformat.com/${hash}/invoke.js`;
 
             container.appendChild(config);
             container.appendChild(script);
@@ -59,7 +60,7 @@ export function AdsterraAd({ type, hash, className, onClick }: AdsterraAdProps) 
         }
     }, [type, hash]);
 
-    if (type === 'banner_728x90') {
+    if (type === 'banner') {
         return <div ref={adRef} className={className} />;
     }
 

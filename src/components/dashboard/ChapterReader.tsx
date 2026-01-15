@@ -47,8 +47,9 @@ export function ChapterReader({ manhwa, chapter, onClose, onNextChapter, onPrevC
         } else {
             setImages([]);
         }
-        // Reset scroll when chapter changes
+        // Reset scroll and ad-click state when chapter changes
         window.scrollTo(0, 0);
+        setHasClickedAd(false);
     }, [chapter]);
 
     const fetchChapterImages = async () => {
@@ -134,8 +135,10 @@ export function ChapterReader({ manhwa, chapter, onClose, onNextChapter, onPrevC
                     {/* AD SLOT: TOP BANNER */}
                     <div className="w-full max-w-[728px] h-[90px] mx-auto bg-white/5 flex items-center justify-center text-[10px] text-gray-600 border border-dashed border-white/10 mb-4 overflow-hidden relative">
                         <AdsterraAd
-                            type="banner_728x90"
-                            hash="PLACEHOLDER_HASH_TOP" // Replace with your hash
+                            type="banner"
+                            width={728}
+                            height={90}
+                            hash="PLACEHOLDER_HASH_TOP" // Replace with your 728x90 hash
                             className="w-full h-full"
                         />
                         <span className="absolute">AD SLOT: 728x90 Top Banner</span>
@@ -176,10 +179,12 @@ export function ChapterReader({ manhwa, chapter, onClose, onNextChapter, onPrevC
                     {/* Navigation Buttons & Ads */}
                     <div className="py-20 flex flex-col items-center gap-6 border-t border-white/5 mt-10">
                         {/* AD SLOT: BOTTOM BANNER */}
-                        <div className="w-full max-w-[728px] h-[90px] bg-white/5 flex items-center justify-center text-[10px] text-gray-600 border border-dashed border-white/10 mb-4 overflow-hidden">
+                        <div className="w-full max-w-[728px] h-[90px] bg-white/5 flex items-center justify-center text-[10px] text-gray-600 border border-dashed border-white/10 mb-4 overflow-hidden relative">
                             <AdsterraAd
-                                type="banner_728x90"
-                                hash="PLACEHOLDER_HASH_BOTTOM" // Replace with your hash
+                                type="banner"
+                                width={728}
+                                height={90}
+                                hash="PLACEHOLDER_HASH_BOTTOM" // Replace with your 728x90 hash
                                 className="w-full h-full"
                             />
                             {/* If hash is missing, show placeholder for dev */}
