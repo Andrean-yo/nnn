@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Manhwa, Chapter } from '@/types';
 import { X, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { AdsterraAd } from '../ads/AdsterraAd';
 
 interface ChapterReaderProps {
     manhwa: Manhwa;
@@ -17,6 +18,7 @@ export function ChapterReader({ manhwa, chapter, onClose, onNextChapter, onPrevC
     const [images, setImages] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [lastScrollY, setLastScrollY] = useState(0);
+    const [hasClickedAd, setHasClickedAd] = useState(false);
 
     // Hide header on scroll down, show on scroll up
     useEffect(() => {
@@ -81,22 +83,40 @@ export function ChapterReader({ manhwa, chapter, onClose, onNextChapter, onPrevC
 
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-1 sm:gap-2">
-                            <button
-                                onClick={onPrevChapter}
-                                disabled={!onPrevChapter}
-                                className="p-1.5 sm:p-2 bg-white/5 hover:bg-white/10 disabled:opacity-10 rounded-lg transition-colors"
-                                title="Previous Chapter"
-                            >
-                                <ChevronLeft className="w-5 h-5" />
-                            </button>
-                            <button
-                                onClick={onNextChapter}
-                                disabled={!onNextChapter}
-                                className="p-1.5 sm:p-2 bg-white/5 hover:bg-white/10 disabled:opacity-10 rounded-lg transition-colors"
-                                title="Next Chapter"
-                            >
-                                <ChevronRight className="w-5 h-5" />
-                            </button>
+                            <div className="relative">
+                                <button
+                                    onClick={onPrevChapter}
+                                    disabled={!onPrevChapter}
+                                    className="p-1.5 sm:p-2 bg-white/5 hover:bg-white/10 disabled:opacity-10 rounded-lg transition-colors"
+                                    title="Previous Chapter"
+                                >
+                                    <ChevronLeft className="w-5 h-5" />
+                                </button>
+                                {!hasClickedAd && (
+                                    <AdsterraAd
+                                        type="direct_link"
+                                        hash="https://www.highperformanceformat.com/YOUR_DIRECT_LINK"
+                                        onClick={() => setHasClickedAd(true)}
+                                    />
+                                )}
+                            </div>
+                            <div className="relative">
+                                <button
+                                    onClick={onNextChapter}
+                                    disabled={!onNextChapter}
+                                    className="p-1.5 sm:p-2 bg-white/5 hover:bg-white/10 disabled:opacity-10 rounded-lg transition-colors"
+                                    title="Next Chapter"
+                                >
+                                    <ChevronRight className="w-5 h-5" />
+                                </button>
+                                {!hasClickedAd && (
+                                    <AdsterraAd
+                                        type="direct_link"
+                                        hash="https://www.highperformanceformat.com/YOUR_DIRECT_LINK"
+                                        onClick={() => setHasClickedAd(true)}
+                                    />
+                                )}
+                            </div>
                         </div>
                         <button
                             onClick={onClose}
@@ -111,6 +131,16 @@ export function ChapterReader({ manhwa, chapter, onClose, onNextChapter, onPrevC
             {/* Content Area */}
             <div className="flex-1 w-full pt-20">
                 <div className="max-w-3xl mx-auto w-full shadow-2xl bg-black min-h-screen">
+                    {/* AD SLOT: TOP BANNER */}
+                    <div className="w-full max-w-[728px] h-[90px] mx-auto bg-white/5 flex items-center justify-center text-[10px] text-gray-600 border border-dashed border-white/10 mb-4 overflow-hidden relative">
+                        <AdsterraAd
+                            type="banner_728x90"
+                            hash="PLACEHOLDER_HASH_TOP" // Replace with your hash
+                            className="w-full h-full"
+                        />
+                        <span className="absolute">AD SLOT: 728x90 Top Banner</span>
+                    </div>
+
                     <div className="flex flex-col items-center">
                         {isLoading ? (
                             <div className="flex flex-col items-center justify-center py-60 gap-4">
@@ -143,29 +173,64 @@ export function ChapterReader({ manhwa, chapter, onClose, onNextChapter, onPrevC
                         )}
                     </div>
 
-                    {/* Navigation Buttons */}
+                    {/* Navigation Buttons & Ads */}
                     <div className="py-20 flex flex-col items-center gap-6 border-t border-white/5 mt-10">
+                        {/* AD SLOT: BOTTOM BANNER */}
+                        <div className="w-full max-w-[728px] h-[90px] bg-white/5 flex items-center justify-center text-[10px] text-gray-600 border border-dashed border-white/10 mb-4 overflow-hidden">
+                            <AdsterraAd
+                                type="banner_728x90"
+                                hash="PLACEHOLDER_HASH_BOTTOM" // Replace with your hash
+                                className="w-full h-full"
+                            />
+                            {/* If hash is missing, show placeholder for dev */}
+                            <span className="absolute">AD SLOT: 728x90 Banner</span>
+                        </div>
+
                         <div className="text-center">
                             <h3 className="text-2xl font-black italic text-gray-800 uppercase tracking-widest">IndraScans</h3>
                             <p className="text-[10px] text-gray-600 uppercase font-bold tracking-widest">Premium Manhwa Experience</p>
                         </div>
 
                         <div className="flex items-center justify-center gap-4">
-                            <button
-                                onClick={onPrevChapter}
-                                disabled={!onPrevChapter}
-                                className="px-8 py-3 bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:border-white/20 disabled:opacity-20 rounded-full font-bold text-sm transition-all"
-                            >
-                                Previous
-                            </button>
-                            <button
-                                onClick={onNextChapter}
-                                disabled={!onNextChapter}
-                                className="px-10 py-3 bg-primary text-black hover:bg-emerald-400 disabled:opacity-20 rounded-full font-bold text-sm transition-all shadow-lg shadow-primary/20"
-                            >
-                                Next Chapter
-                            </button>
+                            <div className="relative">
+                                <button
+                                    onClick={onPrevChapter}
+                                    disabled={!onPrevChapter}
+                                    className="px-8 py-3 bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:border-white/20 disabled:opacity-20 rounded-full font-bold text-sm transition-all"
+                                >
+                                    Previous
+                                </button>
+                                {!hasClickedAd && (
+                                    <AdsterraAd
+                                        type="direct_link"
+                                        hash="https://www.highperformanceformat.com/YOUR_DIRECT_LINK"
+                                        onClick={() => setHasClickedAd(true)}
+                                    />
+                                )}
+                            </div>
+                            <div className="relative">
+                                <button
+                                    onClick={onNextChapter}
+                                    disabled={!onNextChapter}
+                                    className="px-10 py-3 bg-primary text-black hover:bg-emerald-400 disabled:opacity-20 rounded-full font-bold text-sm transition-all shadow-lg shadow-primary/20"
+                                >
+                                    Next Chapter
+                                </button>
+                                {!hasClickedAd && (
+                                    <AdsterraAd
+                                        type="direct_link"
+                                        hash="https://www.highperformanceformat.com/YOUR_DIRECT_LINK"
+                                        onClick={() => setHasClickedAd(true)}
+                                    />
+                                )}
+                            </div>
                         </div>
+
+                        {/* SOCIAL BAR / POP-UNDER SCRIPT */}
+                        <AdsterraAd
+                            type="social_bar"
+                            hash="621bac8006c680bccb3a616d1962ae68" // User provided hash
+                        />
                     </div>
                 </div>
             </div>
