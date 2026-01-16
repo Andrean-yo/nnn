@@ -1,6 +1,6 @@
 import { Manhwa } from '@/types';
 import { cn } from '@/lib/utils';
-import { X, Save, Trash2, Sparkles } from 'lucide-react';
+import { X, Save, Trash2, Sparkles, Wand2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 
@@ -21,6 +21,8 @@ export function EditorModal({ isOpen, onClose, initialData, onSave, onDelete }: 
     const [endChapterNum, setEndChapterNum] = useState<number | ''>('');
     const [bulkTargetPattern, setBulkTargetPattern] = useState('');
     const [isScraping, setIsScraping] = useState(false);
+    const [isDetecting, setIsDetecting] = useState(false);
+    const [importedManhwaUrl, setImportedManhwaUrl] = useState('');
 
     useEffect(() => {
         if (initialData) {
@@ -198,6 +200,8 @@ export function EditorModal({ isOpen, onClose, initialData, onSave, onDelete }: 
                                                     chapters: data.chapters && data.chapters.length > 0 ? data.chapters : formData.chapters,
                                                     last_chapter: data.chapters && data.chapters.length > 0 ? data.chapters[0].number : formData.last_chapter
                                                 });
+                                                // Save URL for auto detect chapters later
+                                                setImportedManhwaUrl(url);
                                                 alert(`Berhasil! ${data.chapters?.length || 0} Chapter juga ikut ter-import.`);
                                             } catch (err: any) {
                                                 console.error('Import failed:', err);
@@ -386,6 +390,62 @@ export function EditorModal({ isOpen, onClose, initialData, onSave, onDelete }: 
                                                     />
                                                 </div>
                                             </div>
+                                            <button
+                                                type="button"
+                                                disabled={isDetecting || !importedManhwaUrl}
+                                                onClick={async () => {
+                                                    if (!importedManhwaUrl) {
+                                                        alert('Import manhwa terlebih dahulu di tab Details untuk menggunakan Auto Detect!');
+                                                        return;
+                                                    }
+
+                                                    setIsDetecting(true);
+                                                    try {
+                                                        const res = await fetch('/api/detect-chapters', {
+                                                            method: 'POST',
+                                                            headers: { 'Content-Type': 'application/json' },
+                                                            body: JSON.stringify({ url: importedManhwaUrl })
+                                                        });
+
+                                                        const data = await res.json();
+
+                                                        if (!res.ok) {
+                                                            throw new Error(data.error || 'Gagal detect chapters');
+                                                        }
+
+                                                        if (data.lastChapter > 0) {
+                                                            // Auto fill the form
+                                                            const baseUrl = importedManhwaUrl.replace(/\/$/, '');
+                                                            setManualChapterUrl(`${baseUrl}/chapter-1/`);
+                                                            setBulkTargetPattern('chapter-1');
+                                                            setStartChapterNum(1);
+                                                            setEndChapterNum(data.lastChapter);
+                                                            alert(`Berhasil! Terdeteksi ${data.lastChapter} chapter. Silakan klik "Bulk Insert" untuk menambahkan.`);
+                                                        } else {
+                                                            alert('Tidak dapat mendeteksi chapter. Coba isi manual.');
+                                                        }
+                                                    } catch (err: any) {
+                                                        console.error('Auto detect failed:', err);
+                                                        alert(`Gagal Auto Detect: ${err.message}`);
+                                                    } finally {
+                                                        setIsDetecting(false);
+                                                    }
+                                                }}
+                                                className="px-4 py-2 bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 rounded-lg transition-all h-10 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                title="Auto Detect Chapters"
+                                            >
+                                                {isDetecting ? (
+                                                    <>
+                                                        <div className="w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+                                                        <span className="text-xs font-bold">Detecting...</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Wand2 className="w-4 h-4" />
+                                                        <span className="text-xs font-bold">Auto Detect</span>
+                                                    </>
+                                                )}
+                                            </button>
                                             <button
                                                 type="button"
                                                 onClick={() => {
