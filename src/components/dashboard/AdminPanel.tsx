@@ -1,4 +1,4 @@
-import { Plus, LayoutGrid, Settings, Box, BarChart3, Users, Download } from 'lucide-react';
+import { Plus, LayoutGrid, Settings, Box, BarChart3, Users, Download, DollarSign } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
@@ -6,10 +6,11 @@ interface AdminPanelProps {
     onAddClick: () => void;
     onImportClick?: () => void;
     onStatsClick?: () => void;
+    onRevenueClick?: () => void;
     className?: string;
 }
 
-export function AdminPanel({ onAddClick, onImportClick, onStatsClick, className }: AdminPanelProps) {
+export function AdminPanel({ onAddClick, onImportClick, onStatsClick, onRevenueClick, className }: AdminPanelProps) {
     return (
         <div className={cn("fixed left-0 top-0 h-full w-20 flex flex-col items-center py-6 bg-[#0b0d10] border-r border-white/5 z-40 hidden lg:flex shadow-2xl", className)}>
             {/* Logo */}
@@ -34,6 +35,16 @@ export function AdminPanel({ onAddClick, onImportClick, onStatsClick, className 
                         <BarChart3 className="w-6 h-6" />
                         <span className="absolute left-16 bg-[#16191e] text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-white/10 pointer-events-none">
                             Visitor Stats
+                        </span>
+                    </button>
+
+                    <button
+                        onClick={onRevenueClick}
+                        className="group relative p-3 w-full flex justify-center rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all hover:scale-105 text-green-400 bg-green-500/10"
+                    >
+                        <DollarSign className="w-6 h-6" />
+                        <span className="absolute left-16 bg-[#16191e] text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-white/10 pointer-events-none">
+                            Revenue
                         </span>
                     </button>
 

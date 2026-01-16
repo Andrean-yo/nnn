@@ -10,6 +10,7 @@ import { EditorModal } from "@/components/dashboard/EditorModal";
 import { DetailModal } from "@/components/dashboard/DetailModal";
 import { ImportModal } from "@/components/dashboard/ImportModal";
 import { StatsModal } from "@/components/dashboard/StatsModal";
+import { RevenueModal } from "@/components/dashboard/RevenueModal";
 import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
 import { GravityStage } from "@/components/gravity/GravityStage";
 import { UserView } from "@/components/user/UserView";
@@ -30,6 +31,7 @@ function HomeContent() {
     const [isDetailOpen, setIsDetailOpen] = useState(false);
     const [isImportOpen, setIsImportOpen] = useState(false);
     const [isStatsOpen, setIsStatsOpen] = useState(false);
+    const [isRevenueOpen, setIsRevenueOpen] = useState(false);
 
     const [selectedManhwa, setSelectedManhwa] = useState<Manhwa | undefined>(undefined);
     const [showLogin, setShowLogin] = useState(false);
@@ -131,6 +133,7 @@ function HomeContent() {
                     onAddClick={handleAddNew}
                     onImportClick={() => setIsImportOpen(true)}
                     onStatsClick={() => setIsStatsOpen(true)}
+                    onRevenueClick={() => setIsRevenueOpen(true)}
                 />
             )}
 
@@ -372,6 +375,16 @@ function HomeContent() {
                     <StatsModal
                         isOpen={isStatsOpen}
                         onClose={() => setIsStatsOpen(false)}
+                    />
+                )}
+            </AnimatePresence>
+
+            {/* Revenue Modal */}
+            <AnimatePresence>
+                {isRevenueOpen && (
+                    <RevenueModal
+                        isOpen={isRevenueOpen}
+                        onClose={() => setIsRevenueOpen(false)}
                     />
                 )}
             </AnimatePresence>

@@ -296,9 +296,8 @@ export function ImportModal({ isOpen, onClose, onComplete }: ImportModalProps) {
                                                 <input
                                                     type="number"
                                                     value={chapterTo}
-                                                    onChange={(e) => setChapterTo(Math.max(chapterFrom, Math.min(parseInt(e.target.value) || 1, manhwaData.lastChapter)))}
+                                                    onChange={(e) => setChapterTo(Math.max(chapterFrom, parseInt(e.target.value) || 1))}
                                                     min={chapterFrom}
-                                                    max={manhwaData.lastChapter}
                                                     className="w-full px-3 py-2 bg-black/40 border border-white/10 rounded-lg text-white text-center font-bold focus:border-primary/50 outline-none"
                                                     title="To Chapter"
                                                 />
