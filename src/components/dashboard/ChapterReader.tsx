@@ -14,6 +14,50 @@ interface ChapterReaderProps {
     onPrevChapter?: () => void;
 }
 
+// Optimized Image Component with Skeleton
+function ImageWithLoader({ src, index }: { src: string; index: number }) {
+    const [loaded, setLoaded] = useState(false);
+    const [error, setError] = useState(false);
+
+    return (
+        <div className="relative w-full min-h-[400px] bg-[#1a1d24]">
+            {!loaded && !error && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-full h-full animate-pulse bg-white/5" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                    </div>
+                </div>
+            )}
+
+            {error ? (
+                <div className="w-full h-[300px] flex items-center justify-center text-gray-500 flex-col gap-2">
+                    <span className="text-xs uppercase font-bold">Failed to load</span>
+                    <button
+                        onClick={() => { setError(false); }}
+                        className="text-xs text-primary hover:underline"
+                    >
+                        Retry
+                    </button>
+                </div>
+            ) : (
+                <img
+                    src={src}
+                    alt={`Page ${index + 1}`}
+                    className={cn(
+                        "w-full h-auto select-none transition-opacity duration-500",
+                        loaded ? "opacity-100" : "opacity-0"
+                    )}
+                    loading={index < 3 ? "eager" : "lazy"}
+                    decoding="async"
+                    onLoad={() => setLoaded(true)}
+                    onError={() => setError(true)}
+                />
+            )}
+        </div>
+    );
+}
+
 export function ChapterReader({ manhwa, chapter, onClose, onNextChapter, onPrevChapter }: ChapterReaderProps) {
     const [showHeader, setShowHeader] = useState(true);
     const [images, setImages] = useState<string[]>([]);
@@ -134,7 +178,7 @@ export function ChapterReader({ manhwa, chapter, onClose, onNextChapter, onPrevC
             <div className="flex-1 w-full pt-20">
                 <div className="max-w-3xl mx-auto w-full shadow-2xl bg-black min-h-screen">
 
-                    <div className="flex flex-col items-center">
+                    <div className="flex flex-col items-center min-h-screen">
                         {isLoading ? (
                             <div className="flex flex-col items-center justify-center py-60 gap-4">
                                 <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
@@ -142,12 +186,10 @@ export function ChapterReader({ manhwa, chapter, onClose, onNextChapter, onPrevC
                             </div>
                         ) : images.length > 0 ? (
                             images.map((img, idx) => (
-                                <img
+                                <ImageWithLoader
                                     key={idx}
                                     src={img}
-                                    alt={`Page ${idx + 1}`}
-                                    className="w-full h-auto select-none"
-                                    loading="lazy"
+                                    index={idx}
                                 />
                             ))
                         ) : chapter.contentUrl ? (
@@ -155,7 +197,7 @@ export function ChapterReader({ manhwa, chapter, onClose, onNextChapter, onPrevC
                                 {chapter.contentUrl.endsWith('.pdf') ? (
                                     <iframe src={chapter.contentUrl} className="w-full h-screen border-none" />
                                 ) : (
-                                    <img src={chapter.contentUrl} alt={chapter.title} className="w-full h-auto object-contain" />
+                                    <ImageWithLoader src={chapter.contentUrl} index={0} />
                                 )}
                             </div>
                         ) : (

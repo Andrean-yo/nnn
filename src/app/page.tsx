@@ -9,6 +9,8 @@ import { AdminPanel } from "@/components/dashboard/AdminPanel";
 import { EditorModal } from "@/components/dashboard/EditorModal";
 import { DetailModal } from "@/components/dashboard/DetailModal";
 import { ImportModal } from "@/components/dashboard/ImportModal";
+import { StatsModal } from "@/components/dashboard/StatsModal";
+import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
 import { GravityStage } from "@/components/gravity/GravityStage";
 import { UserView } from "@/components/user/UserView";
 import { LoginModal } from "@/components/auth/LoginModal";
@@ -27,6 +29,7 @@ function HomeContent() {
     const [isEditorOpen, setIsEditorOpen] = useState(false);
     const [isDetailOpen, setIsDetailOpen] = useState(false);
     const [isImportOpen, setIsImportOpen] = useState(false);
+    const [isStatsOpen, setIsStatsOpen] = useState(false);
 
     const [selectedManhwa, setSelectedManhwa] = useState<Manhwa | undefined>(undefined);
     const [showLogin, setShowLogin] = useState(false);
@@ -123,7 +126,13 @@ function HomeContent() {
     return (
         <>
             {/* Admin Sidebar - only for developers */}
-            {isDeveloper && <AdminPanel onAddClick={handleAddNew} onImportClick={() => setIsImportOpen(true)} />}
+            {isDeveloper && (
+                <AdminPanel
+                    onAddClick={handleAddNew}
+                    onImportClick={() => setIsImportOpen(true)}
+                    onStatsClick={() => setIsStatsOpen(true)}
+                />
+            )}
 
             {/* Main Content */}
             <main className={`min-h-screen bg-[#0b0d10] text-white ${isDeveloper ? 'lg:pl-20' : ''}`}>
@@ -356,6 +365,19 @@ function HomeContent() {
                     onComplete={handleImportComplete}
                 />
             )}
+
+            {/* Stats Modal */}
+            <AnimatePresence>
+                {isStatsOpen && (
+                    <StatsModal
+                        isOpen={isStatsOpen}
+                        onClose={() => setIsStatsOpen(false)}
+                    />
+                )}
+            </AnimatePresence>
+
+            {/* Analytics Tracker */}
+            <AnalyticsTracker />
         </>
     );
 }
