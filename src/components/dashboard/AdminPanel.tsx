@@ -1,13 +1,14 @@
-import { Plus, LayoutGrid, Settings, Box, BarChart3, Users } from 'lucide-react';
+import { Plus, LayoutGrid, Settings, Box, BarChart3, Users, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
 interface AdminPanelProps {
     onAddClick: () => void;
+    onImportClick?: () => void;
     className?: string;
 }
 
-export function AdminPanel({ onAddClick, className }: AdminPanelProps) {
+export function AdminPanel({ onAddClick, onImportClick, className }: AdminPanelProps) {
     return (
         <div className={cn("fixed left-0 top-0 h-full w-20 flex flex-col items-center py-6 bg-[#0b0d10] border-r border-white/5 z-40 hidden lg:flex shadow-2xl", className)}>
             {/* Logo */}
@@ -48,8 +49,20 @@ export function AdminPanel({ onAddClick, className }: AdminPanelProps) {
                 </div>
             </div>
 
-            {/* Add Button */}
-            <div className="mt-auto mb-6">
+            {/* Import & Add Buttons */}
+            <div className="mt-auto mb-6 space-y-4">
+                {onImportClick && (
+                    <button
+                        onClick={onImportClick}
+                        className="group relative w-12 h-12 flex items-center justify-center rounded-2xl bg-blue-500/20 border border-blue-500/30 text-blue-400 hover:scale-110 transition-all hover:bg-blue-500/30"
+                    >
+                        <Download className="w-5 h-5" />
+                        <span className="absolute left-16 bg-blue-500 text-white font-bold text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                            Import Raw
+                        </span>
+                    </button>
+                )}
+
                 <button
                     onClick={onAddClick}
                     className="group relative w-12 h-12 flex items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-emerald-500 text-black hover:scale-110 transition-all shadow-[0_0_20px_-5px_rgba(52,211,153,0.5)]"

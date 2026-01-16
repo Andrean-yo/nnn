@@ -8,6 +8,7 @@ import { ManhwaGrid } from "@/components/dashboard/ManhwaGrid";
 import { AdminPanel } from "@/components/dashboard/AdminPanel";
 import { EditorModal } from "@/components/dashboard/EditorModal";
 import { DetailModal } from "@/components/dashboard/DetailModal";
+import { ImportModal } from "@/components/dashboard/ImportModal";
 import { GravityStage } from "@/components/gravity/GravityStage";
 import { UserView } from "@/components/user/UserView";
 import { LoginModal } from "@/components/auth/LoginModal";
@@ -25,6 +26,7 @@ function HomeContent() {
     // Split modal states
     const [isEditorOpen, setIsEditorOpen] = useState(false);
     const [isDetailOpen, setIsDetailOpen] = useState(false);
+    const [isImportOpen, setIsImportOpen] = useState(false);
 
     const [selectedManhwa, setSelectedManhwa] = useState<Manhwa | undefined>(undefined);
     const [showLogin, setShowLogin] = useState(false);
@@ -33,7 +35,7 @@ function HomeContent() {
     const [searchQuery, setSearchQuery] = useState("");
     const [isSearchVisible, setIsSearchVisible] = useState(false);
 
-    const { data, isLoading, updateManhwa, addManhwa, deleteManhwa } = useManhwaData();
+    const { data, isLoading, updateManhwa, addManhwa, deleteManhwa, refresh } = useManhwaData();
     const { isAuthenticated, user, login, register, logout } = useAuth();
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -94,6 +96,11 @@ function HomeContent() {
         }
     };
 
+    const handleImportComplete = () => {
+        refresh(); // Refresh data after import
+        setIsImportOpen(false);
+    };
+
     // If user view is active and user is authenticated
     if (showUserView && isAuthenticated && user?.role === 'user') {
         return <UserView onBack={() => setShowUserView(false)} data={data} />;
@@ -116,7 +123,7 @@ function HomeContent() {
     return (
         <>
             {/* Admin Sidebar - only for developers */}
-            {isDeveloper && <AdminPanel onAddClick={handleAddNew} />}
+            {isDeveloper && <AdminPanel onAddClick={handleAddNew} onImportClick={() => setIsImportOpen(true)} />}
 
             {/* Main Content */}
             <main className={`min-h-screen bg-[#0b0d10] text-white ${isDeveloper ? 'lg:pl-20' : ''}`}>
@@ -340,6 +347,15 @@ function HomeContent() {
                     setShowLogin(true);
                 }}
             />
+
+            {/* Import Modal - only for developers */}
+            {isDeveloper && (
+                <ImportModal
+                    isOpen={isImportOpen}
+                    onClose={() => setIsImportOpen(false)}
+                    onComplete={handleImportComplete}
+                />
+            )}
         </>
     );
 }
