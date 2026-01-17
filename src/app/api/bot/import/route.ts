@@ -23,12 +23,19 @@ export async function POST(req: NextRequest) {
         // 1. Fetch Page Content & Scrape
         const response = await fetch(url, {
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.9',
             }
         });
 
-        if (!response.ok) throw new Error(`Failed to fetch page: ${response.statusText}`);
+        if (!response.ok) {
+            console.error(`[Bot Error] Fetch failed: ${response.status} ${response.statusText}`);
+            return NextResponse.json({
+                error: `Gagal akses website (${response.status} ${response.statusText}). Kemungkinan diblokir atau domain salah.`
+            }, { status: 400 });
+        }
+
         const html = await response.text();
         const $ = cheerio.load(html);
 
@@ -62,18 +69,23 @@ export async function POST(req: NextRequest) {
                     const $c = cheerio.load(ajaxHtml);
                     $c('a[href*="chapter"]').each((_, el) => {
                         const href = $c(el).attr('href') || '';
-                        const match = href.match(/chapter-(\d+)/i) || href.match(/(\d+)\/?$/);
-                        if (match) chapters.push(parseInt(match[1]));
+                        // More flexible regex for chapter numbers
+                        const match = href.match(/chapter-(\d+(?:\.\d+)?)/i) ||
+                            href.replace(/\/$/, '').match(/-(\d+(?:\.\d+)?)$/) ||
+                            href.match(/\/(\d+)\/$/);
+                        if (match) chapters.push(parseFloat(match[1]));
                     });
                 }
             } catch (e) { console.error('AJAX detect failed', e); }
         }
 
         if (chapters.length === 0) {
-            $('a[href*="chapter"]').each((_, el) => {
+            // Broader static detection
+            $('a[href*="chapter"], .wp-manga-chapter a').each((_, el) => {
                 const href = $(el).attr('href') || '';
-                const match = href.match(/chapter-(\d+)/i);
-                if (match) chapters.push(parseInt(match[1]));
+                const match = href.match(/chapter-(\d+(?:\.\d+)?)/i) ||
+                    href.replace(/\/$/, '').match(/-(\d+(?:\.\d+)?)$/);
+                if (match) chapters.push(parseFloat(match[1]));
             });
         }
 
@@ -126,6 +138,7 @@ export async function POST(req: NextRequest) {
             .single();
 
         if (manhwaError) throw new Error(`DB Insert Manhwa Error: ${manhwaError.message}`);
+        if (!insertedManhwa) throw new Error(`Gagal membuat data Manhwa di database (RLS mungkin aktif).`);
 
         // Insert Chapters
         const records = [];
