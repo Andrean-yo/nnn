@@ -107,8 +107,7 @@ export function ImportModal({ isOpen, onClose, onComplete }: ImportModalProps) {
                     thumbnail_url: manhwaData.thumbnail,
                     status: 'Ongoing',
                     type: 'Manhwa',
-                    genres: [],
-                    last_chapter: chapterTo
+                    genres: []
                 }])
                 .select()
                 .single();

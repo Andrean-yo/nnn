@@ -12,7 +12,7 @@ interface AdminPanelProps {
 
 export function AdminPanel({ onAddClick, onImportClick, onStatsClick, onRevenueClick, className }: AdminPanelProps) {
     return (
-        <div className={cn("fixed left-0 top-0 h-full w-20 flex flex-col items-center py-6 bg-[#0b0d10] border-r border-white/5 z-40 hidden lg:flex shadow-2xl", className)}>
+        <div className={cn("fixed left-0 top-0 h-full w-20 flex flex-col items-center py-6 bg-[#0b0d10] border-r border-white/5 z-40 hidden lg:flex shadow-2xl overflow-y-auto scrollbar-none", className)}>
             {/* Logo */}
             <div className="mb-8 p-3 bg-primary/10 rounded-xl group cursor-pointer hover:bg-primary/20 transition-all">
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-emerald-600 group-hover:scale-110 transition-transform shadow-[0_0_15px_-3px_rgba(52,211,153,0.5)]" />
