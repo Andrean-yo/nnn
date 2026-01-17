@@ -22,7 +22,11 @@ export const metadata: Metadata = {
     },
     verification: {
         google: "K_rxGxvfFLlK3ou7yw-OrxHoMrw16V1Je8G0UTDEgLQ",
-    }
+    },
+    icons: {
+        icon: "/logo.png",
+        apple: "/logo.png",
+    },
 };
 
 export default function RootLayout({
