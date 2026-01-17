@@ -1,4 +1,4 @@
-import { Plus, LayoutGrid, Settings, Box, BarChart3, Users, Download, DollarSign } from 'lucide-react';
+import { Plus, LayoutGrid, BarChart3, Download, DollarSign } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
@@ -48,26 +48,7 @@ export function AdminPanel({ onAddClick, onImportClick, onStatsClick, onRevenueC
                         </span>
                     </button>
 
-                    <button className="group relative p-3 w-full flex justify-center rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all hover:scale-105">
-                        <Box className="w-6 h-6" />
-                        <span className="absolute left-16 bg-[#16191e] text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-white/10 pointer-events-none">
-                            Library
-                        </span>
-                    </button>
 
-                    <button className="group relative p-3 w-full flex justify-center rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all hover:scale-105">
-                        <Users className="w-6 h-6" />
-                        <span className="absolute left-16 bg-[#16191e] text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-white/10 pointer-events-none">
-                            Users
-                        </span>
-                    </button>
-
-                    <button className="group relative p-3 w-full flex justify-center rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all hover:scale-105">
-                        <Settings className="w-6 h-6" />
-                        <span className="absolute left-16 bg-[#16191e] text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-white/10 pointer-events-none">
-                            Settings
-                        </span>
-                    </button>
                 </div>
             </div>
 
